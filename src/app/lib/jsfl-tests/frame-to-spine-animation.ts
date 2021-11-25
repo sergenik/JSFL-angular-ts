@@ -105,136 +105,6 @@ export class FrameToSpineAnimation {
   }
 
   // ------------------------------------------------------------- //
-  /** FIXME: SN - it should be more reliable,
-   *    as there could be several same library names in different library folders.
-   */
-  private isBone(namePath) {
-    var name = this.getLibraryName(namePath) + '0000';
-    var ifCollectBoneData =
-      spriteSheetLibrary && spriteSheetLibrary[name] ? false : true;
-    return ifCollectBoneData;
-  }
-
-  private getBoneName(instanceName) {
-    return instanceName + '-bone';
-  }
-
-  private getSlotName(instanceName) {
-    return instanceName + '-slot';
-  }
-
-  /** bones: [{name: string, parent: string, length: number}]
-   *    var boneAnimation or boneTransform: {time?: number, angle?:number}
-   *
-   * Bone timeline types:
-   *
-   *    rotate: Keyframes for a bone's rotation.
-   *    translate: Keyframes for a bone's X and Y position.
-   *    scale: Keyframes for a bone's X and Y scale.
-   *    shear: Keyframes for a bone's X and Y shear.
-   *
-   *    Common bone keyframe attributes:
-   *
-   *    time: The time in seconds for the keyframe. Assume 0 if omitted.
-   *    curve: The interpolation to use between this and the next keyframe.
-   *            If the attribute is omitted the curve is linear, if the value is the string "stepped" the curve is stepped,
-   *            otherwise the value is an array with 4 elements which define the control points: cx1, cy1, cx2, and cy2.
-   *            The X axis unit is frame and the Y axis unit is value.
-   *    rotate keyframe attributes:
-   *
-   *    angle: The bone's rotation relative to the setup pose. Assume 0 if omitted.
-   *    translate keyframe attributes:
-   *
-   *    x: The bone's X position relative to the setup pose. Assume 0 if omitted.
-   *    y: The bone's Y position relative to the setup pose. Assume 0 if omitted.
-   *    scale keyframe attributes:
-   *
-   *    x: The bone's X scale relative to the setup pose. Assume 1 if omitted.
-   *    y: The bone's Y scale relative to the setup pose. Assume 1 if omitted.
-   *    shear keyframe attributes:
-   *
-   *    x: The bone's X shear relative to the setup pose. Assume 0 if omitted.
-   *    y: The bone's Y shear relative to the setup pose. Assume 0 if omitted.
-   */
-  private getBoneTimeline(boneName, parentBoneName) {
-    var transforms = spineAnimation.bones[boneName];
-    if (transforms) {
-      return transforms;
-    }
-
-    // add in bones list
-    spineJson.bones.push({
-      name: boneName,
-      parent: parentBoneName,
-      length: boneLength,
-    });
-    // add in bone animation and return to populate
-    transforms = spineAnimation.bones[boneName] = {};
-    return transforms;
-  }
-
-  /** slots: [{name: string, bone: string, attachment: string}]
-   *   var slotAnimation = slot.attachment;
-   */
-  private getSlotTimeline(slotName, boneName, attachmentName) {
-    var slot = spineAnimation.slots[slotName];
-    if (slot) {
-      return slot.attachment;
-    }
-
-    // add in slot list
-    spineJson.slots.push({
-      name: slotName,
-      bone: boneName,
-      attachment: attachmentName,
-    });
-
-    slot = spineAnimation.slots[slotName] = {
-      name: boneName,
-      attachment: [],
-    };
-    // return to populate timeline
-    return slot.attachment;
-  }
-
-  private getSlotAttachment(slotName, boneName) {
-    var slot = spineAnimation.slots[slotName];
-    var slotAttachment = slot
-      ? spineAnimation.slots[slotName].attachment
-      : null;
-    if (slotAttachment) {
-      return slotAttachment;
-    }
-
-    slot = spineAnimation.slots[slotName] = {
-      name: boneName,
-      bone: boneName,
-      attachment: {},
-    };
-
-    // return to populate timeline
-    return slot.attachment;
-  }
-
-  /** var attachments = spineJson.skins[0].attachments; */
-  private getSkin(slotName, skinName) {
-    var attachments = spineJson.skins[skinIndex].attachments;
-
-    var slot = attachments[slotName];
-    if (!slot) {
-      slot = attachments[slotName] = {};
-    }
-
-    var skin = slot[skinName]; // Texture name
-    if (!skin) {
-      skin = slot[skinName] = {};
-    }
-
-    // return to populate x, y, width, height
-    return skin;
-  }
-
-  // ------------------------------------------------------------- //
   private convertAnimation(
     parentBoneName,
     parentFrames,
@@ -460,6 +330,137 @@ export class FrameToSpineAnimation {
     }
 
     return [index, startFrame, duration, isEmptyFrame];
+  }
+
+  // ------------------------------------------------------------- //
+  // ------------------------------------------------------------- //
+  /** FIXME: SN - it should be more reliable,
+   *    as there could be several same library names in different library folders.
+   */
+  private isBone(namePath) {
+    var name = this.getLibraryName(namePath) + '0000';
+    var ifCollectBoneData =
+      spriteSheetLibrary && spriteSheetLibrary[name] ? false : true;
+    return ifCollectBoneData;
+  }
+
+  private getBoneName(instanceName) {
+    return instanceName + '-bone';
+  }
+
+  private getSlotName(instanceName) {
+    return instanceName + '-slot';
+  }
+
+  /** bones: [{name: string, parent: string, length: number}]
+   *    var boneAnimation or boneTransform: {time?: number, angle?:number}
+   *
+   * Bone timeline types:
+   *
+   *    rotate: Keyframes for a bone's rotation.
+   *    translate: Keyframes for a bone's X and Y position.
+   *    scale: Keyframes for a bone's X and Y scale.
+   *    shear: Keyframes for a bone's X and Y shear.
+   *
+   *    Common bone keyframe attributes:
+   *
+   *    time: The time in seconds for the keyframe. Assume 0 if omitted.
+   *    curve: The interpolation to use between this and the next keyframe.
+   *            If the attribute is omitted the curve is linear, if the value is the string "stepped" the curve is stepped,
+   *            otherwise the value is an array with 4 elements which define the control points: cx1, cy1, cx2, and cy2.
+   *            The X axis unit is frame and the Y axis unit is value.
+   *    rotate keyframe attributes:
+   *
+   *    angle: The bone's rotation relative to the setup pose. Assume 0 if omitted.
+   *    translate keyframe attributes:
+   *
+   *    x: The bone's X position relative to the setup pose. Assume 0 if omitted.
+   *    y: The bone's Y position relative to the setup pose. Assume 0 if omitted.
+   *    scale keyframe attributes:
+   *
+   *    x: The bone's X scale relative to the setup pose. Assume 1 if omitted.
+   *    y: The bone's Y scale relative to the setup pose. Assume 1 if omitted.
+   *    shear keyframe attributes:
+   *
+   *    x: The bone's X shear relative to the setup pose. Assume 0 if omitted.
+   *    y: The bone's Y shear relative to the setup pose. Assume 0 if omitted.
+   */
+  private getBoneTimeline(boneName, parentBoneName) {
+    var transforms = spineAnimation.bones[boneName];
+    if (transforms) {
+      return transforms;
+    }
+
+    // add in bones list
+    spineJson.bones.push({
+      name: boneName,
+      parent: parentBoneName,
+      length: boneLength,
+    });
+    // add in bone animation and return to populate
+    transforms = spineAnimation.bones[boneName] = {};
+    return transforms;
+  }
+
+  /** slots: [{name: string, bone: string, attachment: string}]
+   *   var slotAnimation = slot.attachment;
+   */
+  private getSlotTimeline(slotName, boneName, attachmentName) {
+    var slot = spineAnimation.slots[slotName];
+    if (slot) {
+      return slot.attachment;
+    }
+
+    // add in slot list
+    spineJson.slots.push({
+      name: slotName,
+      bone: boneName,
+      attachment: attachmentName,
+    });
+
+    slot = spineAnimation.slots[slotName] = {
+      name: boneName,
+      attachment: [],
+    };
+    // return to populate timeline
+    return slot.attachment;
+  }
+
+  private getSlotAttachment(slotName, boneName) {
+    var slot = spineAnimation.slots[slotName];
+    var slotAttachment = slot
+      ? spineAnimation.slots[slotName].attachment
+      : null;
+    if (slotAttachment) {
+      return slotAttachment;
+    }
+
+    slot = spineAnimation.slots[slotName] = {
+      name: boneName,
+      bone: boneName,
+      attachment: {},
+    };
+
+    // return to populate timeline
+    return slot.attachment;
+  }
+
+  /** var attachments = spineJson.skins[0].attachments; */
+  private getSkin(slotName, skinName) {
+    var attachments = spineJson.skins[skinIndex].attachments;
+
+    var slot = attachments[slotName];
+    if (!slot) {
+      slot = attachments[slotName] = {};
+    }
+
+    var skin = slot[skinName]; // Texture name
+    if (!skin) {
+      skin = slot[skinName] = {};
+    }
+
+    // return to populate x, y, width, height
+    return skin;
   }
 
   // ------------------------------------------------------------- //
